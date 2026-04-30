@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ChessMaster – Satranç Dersleri</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#262421;--s1:#312E2B;--s2:#3D3A36;
+  --green:#81B64C;--gd:#6FA33D;--gold:#F6C946;
+  --lsq:#EEEED2;--dsq:#769656;
+  --txt:#FFFFFF;--muted:#BABABA;--dim:#7A7A7A;
+  --bdr:rgba(255,255,255,0.08);--r:10px;--r2:16px;
+}
+html,body,#root{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:var(--txt);}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--green);border-radius:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes floatR{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-12px) rotate(3deg)}}
+@keyframes popIn{0%{transform:scale(.84);opacity:0}70%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+@keyframes rainbow{0%{color:#FF6B6B}33%{color:#FFE66D}66%{color:#4ECDC4}100%{color:#FF6B6B}}
+@keyframes glow{0%,100%{box-shadow:0 0 10px rgba(129,182,76,.3)}50%{box-shadow:0 0 26px rgba(129,182,76,.65)}}
+.fadeUp{animation:fadeUp .45s ease both}
+.d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}.d4{animation-delay:.32s}
+.floatY{animation:floatY 4s ease-in-out infinite}
+.floatR{animation:floatR 5s ease-in-out infinite}
+.popIn{animation:popIn .28s ease both}
+.rainbow{animation:rainbow 2.8s linear infinite}
+.glow{animation:glow 2.5s ease-in-out infinite}
+.btn-green{background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:11px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .18s,transform .15s;min-height:44px}
+.btn-green:hover{background:var(--gd);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--bdr);border-radius:var(--r);padding:11px 22px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .18s;min-height:44px}
+.btn-ghost:hover{color:var(--txt);border-color:rgba(255,255,255,.22)}
+.card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r2);transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(0,0,0,.45)}
+.card-kids{border-radius:var(--r2);transition:transform .2s,box-shadow .2s}
+.card-kids:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(78,205,196,.22)}
+input,select,textarea{font-family:inherit;outline:none}
+.sq:hover{filter:brightness(1.12)}
+.nav-links{display:flex;align-items:center;gap:4px}
+.hamburger{display:none!important}
+.mob-menu{display:none;position:absolute;top:60px;left:0;right:0;background:var(--s1);border-bottom:1px solid var(--bdr);padding:10px 14px;flex-direction:column;gap:6px;z-index:200}
+.mob-menu.open{display:flex}
+.lesson-grid{display:grid;grid-template-columns:260px 1fr;gap:18px;max-width:1200px;margin:0 auto;padding:22px 18px}
+.lesson-sidebar{position:sticky;top:68px;height:fit-content}
+.puzzle-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:16px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.feat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.path-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:768px){
+  .nav-links{display:none!important}.hamburger{display:flex!important}
+  .lesson-grid{grid-template-columns:1fr;padding:12px;gap:12px}
+  .lesson-sidebar{position:static}
+  .sidebar-inner{display:flex;flex-direction:row;overflow-x:auto;gap:8px;padding-bottom:4px}
+  .sidebar-item{flex-shrink:0;min-width:140px}
+  .puzzle-grid{grid-template-columns:1fr}
+  .courses-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .feat-grid{grid-template-columns:repeat(2,1fr)}
+  .path-grid{grid-template-columns:1fr}
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .hero-btns{flex-direction:column;align-items:stretch}
+  .hero-btns button{width:100%}
+  .footer-grid{grid-template-columns:1fr!important}
+  .modal-footer{flex-direction:column}
+  .modal-footer button{width:100%}
+}
+@media(max-width:480px){.dash-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#81B64C;font-size:18px;font-family:sans-serif">Yükleniyor…</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3/dist/htm.js"></script>
+<script>
+const html = htm.bind(React.createElement);
+const { useState, useCallback } = React;
+
+/* ═══════════════ DATA ═══════════════ */
+const PS = {wK:'♔',wQ:'♕',wR:'♖',wB:'♗',wN:'♘',wP:'♙',bK:'♚',bQ:'♛',bR:'♜',bB:'♝',bN:'♞',bP:'♟'};
+const FILES = ['a','b','c','d','e','f','g','h'];
+const RANKS = ['8','7','6','5','4','3','2','1'];
+const INIT_POS = {
+  a8:'bR',b8:'bN',c8:'bB',d8:'bQ',e8:'bK',f8:'bB',g8:'bN',h8:'bR',
+  a7:'bP',b7:'bP',c7:'bP',d7:'bP',e7:'bP',f7:'bP',g7:'bP',h7:'bP',
+  a2:'wP',b2:'wP',c2:'wP',d2:'wP',e2:'wP',f2:'wP',g2:'wP',h2:'wP',
+  a1:'wR',b1:'wN',c1:'wB',d1:'wQ',e1:'wK',f1:'wB',g1:'wN',h1:'wR',
+};
+const COURSES = [
+  {id:1,title:'Satranç Temelleri',level:'Başlangıç',target:'adult',emoji:'♟',hours:6,lessons:12,rating:4.9,students:1250,color:'#81B64C',badge:'En Popüler',desc:'Sıfırdan satranç öğrenin. Taşların hareketlerinden temel stratejilere.'},
+  {id:2,title:'Açılış Repertuarı',level:'Orta',target:'adult',emoji:'♛',hours:9,lessons:18,rating:4.8,students:890,color:'#F6C946',badge:'Öne Çıkan',desc:'Güçlü açılışları öğrenin ve rakibinizi hazırlıksız yakalayın.'},
+  {id:3,title:'Taktik Ustası',level:'İleri',target:'adult',emoji:'♜',hours:12,lessons:24,rating:4.9,students:654,color:'#E06B6B',badge:null,desc:'Kazanan kombinasyonlar, çatallar, bağlamalar ve daha fazlası.'},
+  {id:4,title:'Endgame Teknikleri',level:'İleri',target:'adult',emoji:'♔',hours:8,lessons:16,rating:4.7,students:423,color:'#7BBFEA',badge:null,desc:'Oyun sonlarını kazanmayı öğrenin.'},
+  {id:5,title:'Mini Satranç Ustası',level:'Başlangıç',target:'kids',emoji:'⭐',hours:5,lessons:10,rating:5.0,students:2100,color:'#FF6B6B',badge:'🏆 En Sevilen',desc:'Çocuklar için eğlenceli ve sevimli satranç dersleri!'},
+  {id:6,title:'Küçük Şampiyonlar',level:'Orta',target:'kids',emoji:'🏆',hours:8,lessons:15,rating:4.9,students:1450,color:'#4ECDC4',badge:'🎯 Popüler',desc:'Turnuvalara hazırlan ve şampiyon ol!'},
+  {id:7,title:'Satranç Maceracıları',level:'Başlangıç',target:'kids',emoji:'🚀',hours:4,lessons:8,rating:4.8,students:980,color:'#9B5DE5',badge:null,desc:'Hayal dünyasında satranç öğren, maceraya katıl!'},
+];
+const LESSONS = [
+  {id:1,cid:1,title:'Taşların Tanıtımı',type:'video',dur:'15 dk',order:1,done:true},
+  {id:2,cid:1,title:'Piyonun Hareketi',type:'practice',dur:'20 dk',order:2,done:true,
+   pzl:{pos:{e4:'wP',d5:'bP',f5:'bP',e1:'wK',e8:'bK',c3:'wB'},from:'c3',to:'f6',hint:'Fil ile tehdidi bul!'}},
+  {id:3,cid:1,title:'At ve Fil Hareketleri',type:'video',dur:'18 dk',order:3,done:false},
+  {id:4,cid:1,title:'Rok Manevrası',type:'practice',dur:'25 dk',order:4,done:false,
+   pzl:{pos:{e1:'wK',h1:'wR',e8:'bK',d8:'bQ',f8:'bB'},from:'e1',to:'g1',hint:'Rok yap, kalenle bağlan!'}},
+  {id:5,cid:2,title:'e4 Açılışı',type:'video',dur:'22 dk',order:1,done:false},
+  {id:6,cid:2,title:'Sicilya Savunması',type:'practice',dur:'30 dk',order:2,done:false,
+   pzl:{pos:{e4:'wP',c5:'bP',g1:'wN',b8:'bN',e1:'wK',e8:'bK'},from:'g1',to:'f3',hint:'Atı en iyi kareye götür!'}},
+  {id:7,cid:5,title:'Taşları Tanı!',type:'video',dur:'10 dk',order:1,done:false},
+  {id:8,cid:5,title:'İlk Hamleni Yap!',type:'practice',dur:'15 dk',order:2,done:false,
+   pzl:{pos:{e2:'wP',d2:'wP',c2:'wP',e1:'wK',e8:'bK'},from:'e2',to:'e4',hint:'Merkezi kontrol et!'}},
+];
+const INIT_USERS = [
+  {id:1,name:'Ahmet Yılmaz',email:'ahmet@mail.com',pass:'1234',role:'user',join:'15 Oca 2024',enrolled:[1,2],progress:65},
+  {id:2,name:'Zeynep Kaya',email:'zeynep@mail.com',pass:'1234',role:'user',join:'20 Şub 2024',enrolled:[1],progress:42},
+  {id:3,name:'Can Demir',email:'can@mail.com',pass:'1234',role:'user',join:'05 Mar 2024',enrolled:[5,6],progress:78},
+  {id:4,name:'Admin',email:'admin@chess.com',pass:'admin123',role:'admin',join:'01 Ara 2023',enrolled:[],progress:100},
+];
+
+/* ═══════════════ CHESS BOARD ═══════════════ */
+function ChessBoard({ position, kids, puzzle, onSolve }) {
+  const [pos,   setPos]   = useState(() => Object.assign({}, position || INIT_POS));
+  const [sel,   setSel]   = useState(null);
+  const [state, setState] = useState('idle');
+  const lSq = kids ? '#FFF5CC' : '#EEEED2';
+  const dSq = kids ? '#4ECDC4' : '#769656';
+
+  function click(sq) {
+    if (state === 'solved') return;
+    if (sel) {
+      if (sq === sel) { setSel(null); return; }
+      var np = Object.assign({}, pos);
+      np[sq] = np[sel]; delete np[sel]; setPos(np);
+      if (puzzle) {
+        if (puzzle.from === sel && puzzle.to === sq) {
+          setState('solved'); if (onSolve) setTimeout(onSolve, 700);
+        } else {
+          setState('wrong');
+          setTimeout(function() { setPos(Object.assign({}, position || INIT_POS)); setState('idle'); }, 900);
+        }
+      }
+      setSel(null);
+    } else { if (pos[sq]) setSel(sq); }
+  }
+
+  var cells = [];
+  RANKS.forEach(function(r, ri) {
+    cells.push(html`<div key=${'rl'+r} style=${{display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,color:kids?'#9B5DE5':'#999',fontWeight:600}}>${r}</div>`);
+    FILES.forEach(function(f, fi) {
+      var sq = f+r, light = (fi+ri)%2===0, pc = pos[sq], isSel = sel===sq;
+      var isHint = puzzle && !isSel && sel===puzzle.from && sq===puzzle.to;
+      var bg = light ? lSq : dSq;
+      if (isSel) bg = '#F6F669';
+      if (isHint) bg = kids ? 'rgba(155,93,229,.5)' : 'rgba(246,201,70,.55)';
+      cells.push(html`
+        <div key=${sq} className="sq" onClick=${function(){click(sq);}}
+          style=${{background:bg,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',transition:'background .12s'}}>
+          ${pc && html`<span style=${{fontSize:'min(5.2vw,34px)',lineHeight:1,
+            color:pc[0]==='w'?'#fff':'#1A1A1A',
+            filter:pc[0]==='w'?'drop-shadow(0 1px 3px rgba(0,0,0,.7))':'drop-shadow(0 1px 1px rgba(255,255,255,.12))',
+            transform:isSel?'scale(1.18)':'scale(1)',transition:'transform .12s'}}>${PS[pc]}</span>`}
+          ${!pc && sel && pos[sel] && html`<div style=${{width:'30%',height:'30%',borderRadius:'50%',background:kids?'rgba(155,93,229,.42)':'rgba(0,0,0,.16)'}}/>`}
+        </div>
+      `);
+    });
+  });
+  cells.push(html`<div/>`);
+  FILES.forEach(function(f) {
+    cells.push(html`<div key=${'fl'+f} style=${{display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,color:kids?'#9B5DE5':'#999',fontWeight:600}}>${f}</div>`);
+  });
+
+  return html`
+    <div style=${{display:'flex',flexDirection:'column',gap:10,alignItems:'center',width:'100%'}}>
+      <div style=${{display:'grid',gridTemplateColumns:'18px repeat(8,1fr)',gridTemplateRows:'repeat(8,1fr) 18px',width:'100%',maxWidth:420,aspectRatio:'9/10',userSelect:'none'}}>
+        ${cells}
+      </div>
+      <div style=${{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
+        ${state==='solved' && html`<span style=${{color:'#81B64C',fontWeight:700,fontSize:13}}>✓ Doğru hamle!</span>`}
+        ${state==='wrong'  && html`<span style=${{color:'#FF6B6B',fontWeight:700,fontSize:13}}>✗ Tekrar dene!</span>`}
+        <button onClick=${function(){setPos(Object.assign({},position||INIT_POS));setSel(null);setState('idle');}}
+          className="btn-ghost" style=${{padding:'5px 12px',fontSize:11,minHeight:32}}>↺ Sıfırla</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ═══════════════ NAVBAR ═══════════════ */
+function Navbar({ page, nav, user, onLogout }) {
+  const [burger, setBurger] = useState(false);
+  const [drop,   setDrop]   = useState(false);
+  function lnk(p, lbl) {
+    return html`<button onClick=${function(){nav(p);setBurger(false);}}
+      style=${{background:'none',border:'none',color:page===p?'#81B64C':'#BABABA',cursor:'pointer',padding:'8px 13px',
+        fontSize:14,fontWeight:600,borderBottom:page===p?'2px solid #81B64C':'2px solid transparent',
+        transition:'color .18s',minHeight:44,fontFamily:'inherit'}}>${lbl}</button>`;
+  }
+  return html`
+    <nav style=${{position:'sticky',top:0,zIndex:100,background:'#1E1B18',borderBottom:'1px solid rgba(255,255,255,.07)',
+      height:60,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px'}}>
+      <div onClick=${function(){nav('home');}} style=${{cursor:'pointer',display:'flex',alignItems:'center',gap:8}}>
+        <span style=${{fontSize:24}}>♟</span>
+        <span style=${{fontFamily:'Playfair Display',fontWeight:900,fontSize:18,color:'#81B64C'}}>ChessMaster</span>
+      </div>
+      <div className="nav-links">
+        ${lnk('home','Ana Sayfa')} ${lnk('courses','Kurslar')} ${lnk('kids','Çocuklar')}
+        ${user ? html`
+          <div style=${{position:'relative',marginLeft:6}}>
+            <button onClick=${function(){setDrop(!drop);}}
+              style=${{background:'rgba(129,182,76,.12)',border:'1px solid rgba(129,182,76,.3)',color:'#81B64C',
+                padding:'7px 13px',borderRadius:8,cursor:'pointer',fontSize:13,fontWeight:600,
+                display:'flex',alignItems:'center',gap:7,fontFamily:'inherit',minHeight:44}}>
+              <span style=${{width:24,height:24,borderRadius:'50%',background:'#81B64C',color:'#fff',
+                display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800}}>${user.name[0]}</span>
+              ${user.name.split(' ')[0]} ▾
+            </button>
+            ${drop && html`
+              <div className="popIn" style=${{position:'absolute',right:0,top:48,background:'#3D3A36',
+                border:'1px solid rgba(255,255,255,.1)',borderRadius:10,padding:6,minWidth:160,zIndex:300}}>
+                <button onClick=${function(){nav('dashboard');setDrop(false);}}
+                  style=${{display:'block',width:'100%',background:'none',border:'none',color:'#fff',
+                    padding:'9px 12px',cursor:'pointer',borderRadius:6,textAlign:'left',fontSize:13,fontFamily:'inherit',minHeight:40}}>📊 İlerleme</button>
+                ${user.role==='admin' && html`
+                  <button onClick=${function(){nav('admin');setDrop(false);}}
+                    style=${{display:'block',width:'100%',background:'none',border:'none',color:'#F6C946',
+                      padding:'9px 12px',cursor:'pointer',borderRadius:6,textAlign:'left',fontSize:13,fontFamily:'inherit',minHeight:40}}>⚙️ Yönetim</button>`}
+                <hr style=${{border:'none',borderTop:'1px solid rgba(255,255,255,.07)',margin:'4px 0'}}/>
+                <button onClick=${function(){onLogout();setDrop(false);}}
+                  style=${{display:'block',width:'100%',background:'none',border:'none',color:'#FF6B6B',
+                    padding:'9px 12px',cursor:'pointer',borderRadius:6,textAlign:'left',fontSize:13,fontFamily:'inherit',minHeight:40}}>🚪 Çıkış</button>
+              </div>`}
+          </div>
+        ` : html`<button onClick=${function(){nav('login');}} className="btn-green" style=${{marginLeft:6,padding:'8px 18px'}}>Giriş Yap</button>`}
+      </div>
+      <button className="hamburger" onClick=${function(){setBurger(!burger);}}
+        style=${{background:'none',border:'none',color:'#fff',fontSize:22,cursor:'pointer',
+          padding:8,minHeight:44,minWidth:44,display:'none',justifyContent:'center',alignItems:'center'}}>
+        ${burger ? '✕' : '☰'}
+      </button>
+      <div className=${`mob-menu${burger?' open':''}`}>
+        ${lnk('home','Ana Sayfa')} ${lnk('courses','Kurslar')} ${lnk('kids','Çocuklar 🌟')}
+        ${user ? html`
+          <span>
+            ${lnk('dashboard','📊 İlerleme')}
+            ${user.role==='admin' && lnk('admin','⚙️ Yönetim')}
+            <button onClick=${function(){onLogout();setBurger(false);}}
+              style=${{background:'rgba(255,107,107,.1)',border:'1px solid rgba(255,107,107,.2)',color:'#FF6B6B',
+                borderRadius:8,padding:'10px 14px',fontSize:14,cursor:'pointer',
+                textAlign:'left',fontFamily:'inherit',minHeight:44,display:'block',width:'100%',marginTop:4}}>🚪 Çıkış</button>
+          </span>
+        ` : html`<button onClick=${function(){nav('login');setBurger(false);}} className="btn-green">Giriş Yap</button>`}
+      </div>
+    </nav>
+  `;
+}
+
+/* ═══════════════ HOME ═══════════════ */
+function HomePage({ nav }) {
+  return html`
+    <div>
+      <section style=${{minHeight:'88vh',display:'flex',flexDirection:'column',alignItems:'center',
+        justifyContent:'center',padding:'60px 20px 40px',position:'relative',overflow:'hidden',textAlign:'center'}}>
+        <div style=${{position:'absolute',inset:0,background:'radial-gradient(ellipse 70% 55% at 50% -5%, rgba(129,182,76,.13) 0%, transparent 68%)'}}/>
+        <div style=${{position:'absolute',top:'8%',left:'2%',fontSize:'min(18vw,110px)',opacity:.04,fontFamily:'Playfair Display',pointerEvents:'none',lineHeight:1}}>♔♕♖</div>
+        <div style=${{position:'absolute',bottom:'5%',right:'2%',fontSize:'min(18vw,110px)',opacity:.04,fontFamily:'Playfair Display',pointerEvents:'none',lineHeight:1}}>♜♝♞</div>
+        <div className="fadeUp" style=${{position:'relative',maxWidth:660}}>
+          <div style=${{display:'inline-block',background:'rgba(129,182,76,.12)',border:'1px solid rgba(129,182,76,.35)',
+            color:'#81B64C',padding:'5px 16px',borderRadius:20,fontSize:11,fontWeight:700,
+            letterSpacing:2,marginBottom:20,textTransform:'uppercase'}}>Türkiye'nin #1 Satranç Platformu</div>
+          <h1 style=${{fontFamily:'Playfair Display',fontSize:'clamp(32px,7vw,66px)',fontWeight:900,lineHeight:1.1,marginBottom:18}}>
+            Satranç Öğren,${html`<br/>`}<span style=${{color:'#81B64C'}}>Şampiyon Ol</span>
+          </h1>
+          <p style=${{color:'#BABABA',fontSize:'clamp(14px,2vw,17px)',lineHeight:1.75,maxWidth:500,margin:'0 auto 30px'}}>
+            Video dersler, interaktif satranç tahtası ve kişisel ilerleme takibi ile gerçek bir satranç ustasına dönüşün.
+          </p>
+          <div className="hero-btns" style=${{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
+            <button onClick=${function(){nav('courses');}} className="btn-green" style=${{fontSize:15,padding:'13px 28px'}}>Kurslara Göz At</button>
+            <button onClick=${function(){nav('kids');}} className="btn-ghost" style=${{fontSize:15,padding:'13px 28px',color:'#4ECDC4',borderColor:'rgba(78,205,196,.4)'}}>Çocuk Kursları 🌟</button>
+          </div>
+        </div>
+        <div className="fadeUp d3 floatR" style=${{marginTop:44,width:'min(330px,76vw)',opacity:.9}}>
+          <${ChessBoard} position=${INIT_POS}/>
+        </div>
+      </section>
+
+      <section style=${{background:'#1E1B18',borderTop:'1px solid rgba(255,255,255,.06)',borderBottom:'1px solid rgba(255,255,255,.06)',padding:'26px 20px'}}>
+        <div className="stats-grid" style=${{maxWidth:860,margin:'0 auto'}}>
+          ${[['7,200+','Aktif Öğrenci'],['45+','Uzman Ders'],['4.9 ★','Ort. Puan'],['%98','Memnuniyet']].map(function(item){
+            return html`<div key=${item[1]} style=${{textAlign:'center',padding:'6px 0'}}>
+              <div style=${{fontFamily:'Playfair Display',fontSize:'clamp(20px,4vw,36px)',fontWeight:900,color:'#81B64C'}}>${item[0]}</div>
+              <div style=${{color:'#7A7A7A',fontSize:12,marginTop:3}}>${item[1]}</div>
+            </div>`;
+          })}
+        </div>
+      </section>
+
+      <section style=${{maxWidth:980,margin:'56px auto',padding:'0 20px'}}>
+        <h2 style=${{fontFamily:'Playfair Display',fontSize:'clamp(20px,4vw,36px)',fontWeight:900,textAlign:'center',marginBottom:28}}>
+          Senin İçin <span style=${{color:'#81B64C'}}>Özel Kurslar</span>
+        </h2>
+        <div className="path-grid">
+          <div className="card fadeUp d1" onClick=${function(){nav('courses');}}
+            style=${{padding:'28px 24px',cursor:'pointer',position:'relative',overflow:'hidden',background:'linear-gradient(135deg,#2A2A1E,#312E2B)'}}>
+            <div style=${{position:'absolute',top:-14,right:-14,fontSize:80,opacity:.07,fontFamily:'Playfair Display',pointerEvents:'none'}}>♔</div>
+            <div style=${{fontSize:40,marginBottom:12}}>♟</div>
+            <h3 style=${{fontFamily:'Playfair Display',fontSize:22,fontWeight:800,marginBottom:9}}>Yetişkin Kursları</h3>
+            <p style=${{color:'#BABABA',lineHeight:1.7,fontSize:13,marginBottom:18}}>Açılış teorisi, taktik kombinasyonlar ve derin strateji analiziyle profesyonel seviyeye ulaşın.</p>
+            <div style=${{display:'flex',gap:6,flexWrap:'wrap',marginBottom:16}}>
+              ${['Başlangıç','Orta','İleri'].map(function(l){return html`<span key=${l} style=${{background:'rgba(129,182,76,.12)',color:'#81B64C',padding:'3px 9px',borderRadius:10,fontSize:11,fontWeight:600}}>${l}</span>`;})}
+            </div>
+            <div style=${{color:'#81B64C',fontWeight:700,fontSize:13}}>Keşfet →</div>
+          </div>
+          <div className="card-kids fadeUp d2" onClick=${function(){nav('kids');}}
+            style=${{padding:'28px 24px',cursor:'pointer',background:'linear-gradient(135deg,rgba(255,107,107,.07),rgba(78,205,196,.07))',
+              border:'1px solid rgba(78,205,196,.2)',borderRadius:'var(--r2)',position:'relative',overflow:'hidden'}}>
+            <div style=${{position:'absolute',top:-6,right:-6,fontSize:65,opacity:.14,pointerEvents:'none'}}>🌟</div>
+            <div style=${{fontSize:40,marginBottom:12}}>🎮</div>
+            <h3 style=${{fontFamily:'Fredoka One',fontSize:24,marginBottom:9,background:'linear-gradient(135deg,#FF6B6B,#4ECDC4)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>Çocuk Kursları</h3>
+            <p style=${{color:'#BABABA',lineHeight:1.7,fontSize:13,marginBottom:18}}>Eğlenceli animasyonlar ve oyunlaştırılmış derslerle 6–12 yaş çocuklar satrancı seviyor!</p>
+            <div style=${{display:'flex',gap:6,flexWrap:'wrap',marginBottom:16}}>
+              ${['6–8 Yaş','9–12 Yaş','Eğlenceli!'].map(function(l){return html`<span key=${l} style=${{background:'rgba(78,205,196,.1)',color:'#4ECDC4',padding:'3px 9px',borderRadius:10,fontSize:11,fontWeight:600}}>${l}</span>`;})}
+            </div>
+            <div style=${{color:'#4ECDC4',fontWeight:700,fontSize:13,fontFamily:'Fredoka One'}}>Maceraya Katıl →</div>
+          </div>
+        </div>
+      </section>
+
+      <section style=${{background:'#1E1B18',borderTop:'1px solid rgba(255,255,255,.06)',padding:'52px 20px'}}>
+        <div style=${{maxWidth:980,margin:'0 auto'}}>
+          <h2 style=${{fontFamily:'Playfair Display',fontSize:'clamp(20px,4vw,34px)',fontWeight:900,textAlign:'center',marginBottom:32}}>
+            Neden <span style=${{color:'#81B64C'}}>ChessMaster?</span>
+          </h2>
+          <div className="feat-grid">
+            ${[{ic:'🎬',t:'HD Video Dersler',d:'Uzman eğitmenlerden yüksek kaliteli video içerikler'},
+               {ic:'♟',t:'İnteraktif Tahta',d:'Gerçek satranç tahtasında anında pratik yapın'},
+               {ic:'📈',t:'İlerleme Takibi',d:'Her ders sonrası gelişiminizi anlık izleyin'},
+               {ic:'🏆',t:'Sertifika',d:'Kurs bitirince dijital sertifikanızı alın'}].map(function(x){
+              return html`<div key=${x.t} style=${{background:'var(--s2)',border:'1px solid var(--bdr)',borderRadius:14,padding:'20px 16px',textAlign:'center'}}>
+                <div style=${{fontSize:30,marginBottom:10}}>${x.ic}</div>
+                <h3 style=${{fontWeight:700,marginBottom:6,fontSize:14}}>${x.t}</h3>
+                <p style=${{color:'#7A7A7A',fontSize:12,lineHeight:1.6}}>${x.d}</p>
+              </div>`;
+            })}
+          </div>
+        </div>
+      </section>
+    </div>
+  `;
+}
+
+/* ═══════════════ COURSES ═══════════════ */
+function CoursesPage({ nav, setActiveCourse }) {
+  const [filter, setFilter] = useState('all');
+  var list = COURSES.filter(function(c){ return c.target==='adult' && (filter==='all' || c.level===filter); });
+  return html`
+    <div style=${{maxWidth:1060,margin:'0 auto',padding:'36px 18px'}}>
+      <div className="fadeUp" style=${{marginBottom:28}}>
+        <div style=${{color:'#81B64C',fontSize:11,fontWeight:700,letterSpacing:2,textTransform:'uppercase',marginBottom:10}}>Yetişkin Kursları</div>
+        <h1 style=${{fontFamily:'Playfair Display',fontSize:'clamp(24px,5vw,44px)',fontWeight:900,marginBottom:10}}>Satranç <span style=${{color:'#81B64C'}}>Uzmanlığına</span> Yolculuk</h1>
+        <p style=${{color:'#BABABA',fontSize:14,maxWidth:480}}>Kendi hızınızda ilerleyin. Başlangıçtan ileri seviyeye tüm içerikler.</p>
+      </div>
+      <div style=${{display:'flex',gap:8,marginBottom:24,flexWrap:'wrap'}}>
+        ${['all','Başlangıç','Orta','İleri'].map(function(f){
+          return html`<button key=${f} onClick=${function(){setFilter(f);}}
+            style=${{background:filter===f?'#81B64C':'var(--s2)',color:filter===f?'#fff':'#BABABA',
+              border:'1px solid '+(filter===f?'#81B64C':'var(--bdr)'),padding:'8px 16px',borderRadius:8,
+              cursor:'pointer',fontSize:13,fontWeight:600,fontFamily:'inherit',minHeight:40}}>
+            ${f==='all'?'Tümü':f}
+          </button>`;
+        })}
+      </div>
+      <div className="courses-grid">
+        ${list.map(function(c){
+          return html`<div key=${c.id} className="card" onClick=${function(){setActiveCourse(c);nav('lesson');}} style=${{overflow:'hidden',cursor:'pointer'}}>
+            <div style=${{background:'linear-gradient(135deg,'+c.color+'20,'+c.color+'06)',padding:'24px 18px',textAlign:'center',borderBottom:'1px solid var(--bdr)'}}>
+              <div style=${{fontSize:46}}>${c.emoji}</div>
+              ${c.badge && html`<div style=${{marginTop:8,display:'inline-block',background:c.color+'28',color:c.color,padding:'3px 9px',borderRadius:10,fontSize:11,fontWeight:700}}>${c.badge}</div>`}
+            </div>
+            <div style=${{padding:18}}>
+              <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:7}}>
+                <span style=${{background:'var(--s2)',color:'#BABABA',padding:'2px 7px',borderRadius:6,fontSize:11}}>${c.level}</span>
+                <span style=${{color:'#F6C946',fontSize:12,fontWeight:600}}>★ ${c.rating}</span>
+              </div>
+              <h3 style=${{fontFamily:'Playfair Display',fontSize:16,fontWeight:800,marginBottom:6}}>${c.title}</h3>
+              <p style=${{color:'#7A7A7A',fontSize:12,lineHeight:1.6,marginBottom:12}}>${c.desc}</p>
+              <div style=${{display:'flex',gap:10,color:'#555',fontSize:11,borderTop:'1px solid var(--bdr)',paddingTop:10}}>
+                <span>📚 ${c.lessons}</span><span>⏱ ${c.hours}s</span><span>👥 ${c.students.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>`;
+        })}
+      </div>
+    </div>
+  `;
+}
+
+/* ═══════════════ KIDS PAGE ═══════════════ */
+function KidsPage({ nav, setActiveCourse }) {
+  var kids = COURSES.filter(function(c){ return c.target==='kids'; });
+  var floaters = ['🦁','🐲','⭐','🌈','🎮','🚀','🏆','🎯'];
+  var positions = [14,22,38,55,18,45,60,30];
+  return html`
+    <div>
+      <section style=${{position:'relative',overflow:'hidden',padding:'52px 20px 36px',textAlign:'center',background:'linear-gradient(180deg,rgba(78,205,196,.05) 0%,transparent 100%)'}}>
+        <div style=${{position:'absolute',inset:0,background:'radial-gradient(ellipse 70% 48% at 50% 0%, rgba(155,93,229,.1) 0%, transparent 65%)'}}/>
+        ${floaters.map(function(e,i){
+          return html`<div key=${i} className="floatY" style=${{position:'absolute',top:positions[i]+'%',left:(4+i*12)+'%',
+            fontSize:'clamp(15px,2.5vw,26px)',opacity:.2,animationDelay:(i*.3)+'s',
+            animationDuration:(2.8+i*.22)+'s',pointerEvents:'none'}}>${e}</div>`;
+        })}
+        <div className="fadeUp" style=${{position:'relative'}}>
+          <div className="rainbow" style=${{fontFamily:'Fredoka One',fontSize:'clamp(12px,2vw,16px)',letterSpacing:2,marginBottom:12}}>🎉 ÇOCUKLARA ÖZEL 🎉</div>
+          <h1 style=${{fontFamily:'Fredoka One',fontSize:'clamp(32px,8vw,66px)',marginBottom:12,lineHeight:1.1}}>
+            <span style=${{background:'linear-gradient(135deg,#FF6B6B,#FFE66D,#4ECDC4)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>Satranç</span> Süper Eğlenceli!
+          </h1>
+          <p style=${{color:'#BABABA',fontSize:'clamp(13px,2vw,16px)',maxWidth:420,margin:'0 auto 24px',lineHeight:1.75}}>Renkli dersler, ödüller ve arkadaşlarınla yarış! 🐉</p>
+          <div style=${{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
+            ${['6–8 Yaş 🌟','9–12 Yaş 🚀','Ebeveyn ile 💝'].map(function(t){
+              return html`<span key=${t} style=${{background:'rgba(78,205,196,.1)',border:'1px solid rgba(78,205,196,.3)',color:'#4ECDC4',padding:'6px 14px',borderRadius:18,fontSize:11,fontWeight:600}}>${t}</span>`;
+            })}
+          </div>
+        </div>
+      </section>
+      <section style=${{maxWidth:940,margin:'0 auto',padding:'20px 18px 56px'}}>
+        <div className="courses-grid">
+          ${kids.map(function(c,i){
+            return html`<div key=${c.id} className="card-kids" onClick=${function(){setActiveCourse(c);nav('lesson');}}
+              style=${{background:'linear-gradient(135deg,'+c.color+'13,var(--s1))',border:'2px solid '+c.color+'35',
+                borderRadius:20,overflow:'hidden',cursor:'pointer'}}>
+              <div style=${{padding:'24px 18px 16px',textAlign:'center',borderBottom:'1px solid '+c.color+'20'}}>
+                <div className="floatY" style=${{fontSize:50,animationDuration:(3.2+i*.3)+'s',animationDelay:(i*.2)+'s'}}>${c.emoji}</div>
+                ${c.badge && html`<div style=${{marginTop:7,display:'inline-block',background:c.color+'26',color:c.color,padding:'3px 9px',borderRadius:10,fontSize:11,fontWeight:700}}>${c.badge}</div>`}
+              </div>
+              <div style=${{padding:18}}>
+                <h3 style=${{fontFamily:'Fredoka One',fontSize:19,marginBottom:7,color:'#fff'}}>${c.title}</h3>
+                <p style=${{color:'#BABABA',fontSize:12,lineHeight:1.6,marginBottom:12}}>${c.desc}</p>
+                <div style=${{display:'flex',gap:7,marginBottom:12,flexWrap:'wrap'}}>
+                  <span style=${{background:c.color+'20',color:c.color,padding:'3px 9px',borderRadius:10,fontSize:11,fontWeight:600}}>📚 ${c.lessons} ders</span>
+                  <span style=${{background:c.color+'20',color:c.color,padding:'3px 9px',borderRadius:10,fontSize:11,fontWeight:600}}>⏱ ${c.hours} saat</span>
+                </div>
+                <div style=${{background:c.color,color:'#fff',padding:'9px',borderRadius:10,textAlign:'center',fontFamily:'Fredoka One',fontSize:14}}>Maceraya Başla! 🚀</div>
+              </div>
+            </div>`;
+          })}
+        </div>
+      </section>
+      <section style=${{background:'#1E1B18',borderTop:'1px solid rgba(78,205,196,.1)',padding:'42px 20px'}}>
+        <h2 style=${{fontFamily:'Fredoka One',fontSize:'clamp(18px,4vw,30px)',textAlign:'center',marginBottom:26,color:'#4ECDC4'}}>Satranç Öğrenmek Harika! 🌟</h2>
+        <div className="feat-grid" style=${{maxWidth:760,margin:'0 auto'}}>
+          ${[{e:'🧠',t:'Zekâyı Geliştirir'},{e:'🎯',t:'Odaklanmayı Artırır'},{e:'🤝',t:'Strateji Öğretir'},{e:'🏆',t:'Özgüven Verir'}].map(function(x){
+            return html`<div key=${x.t} style=${{background:'var(--s2)',border:'1px solid rgba(78,205,196,.12)',borderRadius:12,padding:'18px 12px',textAlign:'center'}}>
+              <div style=${{fontSize:28,marginBottom:8}}>${x.e}</div>
+              <div style=${{fontFamily:'Fredoka One',fontSize:13,color:'#fff'}}>${x.t}</div>
+            </div>`;
+          })}
+        </div>
+      </section>
+    </div>
+  `;
+}
+
+/* ═══════════════ LESSON PAGE ═══════════════ */
+function LessonPage({ course, nav }) {
+  var cl = LESSONS.filter(function(l){ return l.cid === course.id; });
+  const [active, setActive] = useState(cl[0] || null);
+  const [solved, setSolved] = useState({});
+  var kids = course.target === 'kids';
+  var accent = kids ? '#4ECDC4' : '#81B64C';
+  var idx = cl.indexOf(active);
+
+  return html`
+    <div className="lesson-grid">
+      <aside className="lesson-sidebar">
+        <div style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:'var(--r2)',padding:14}}>
+          <div style=${{marginBottom:12,paddingBottom:12,borderBottom:'1px solid var(--bdr)'}}>
+            <div style=${{fontSize:26,marginBottom:5}}>${course.emoji}</div>
+            <h3 style=${{fontFamily:kids?'Fredoka One':'Playfair Display',fontSize:14,fontWeight:700,marginBottom:3}}>${course.title}</h3>
+            <div style=${{color:'#7A7A7A',fontSize:11}}>${cl.length} ders · ${course.hours} saat</div>
+          </div>
+          <div className="sidebar-inner">
+            ${cl.map(function(l){
+              var done = solved[l.id] || l.done;
+              var isAct = active && active.id === l.id;
+              return html`<div key=${l.id} className="sidebar-item" onClick=${function(){setActive(l);}}
+                style=${{padding:'9px 10px',borderRadius:8,cursor:'pointer',
+                  background:isAct?(kids?'rgba(78,205,196,.1)':'rgba(129,182,76,.1)'):'transparent',
+                  border:'1px solid '+(isAct?accent+'50':'transparent'),transition:'all .18s'}}>
+                <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:5}}>
+                  <span style=${{fontSize:11,color:isAct?accent:'#BABABA',fontWeight:isAct?600:400,lineHeight:1.4}}>${l.order}. ${l.title}</span>
+                  <span style=${{fontSize:12,flexShrink:0}}>${done?'✅':l.type==='video'?'▶':'♟'}</span>
+                </div>
+                <div style=${{fontSize:10,color:'#555',marginTop:2}}>${l.type==='video'?'Video':'Pratik'} · ${l.dur}</div>
+              </div>`;
+            })}
+          </div>
+          <button onClick=${function(){nav('courses');}} className="btn-ghost" style=${{width:'100%',marginTop:10,padding:'8px',fontSize:12,minHeight:36}}>← Kurslara Dön</button>
+        </div>
+      </aside>
+
+      <main>
+        ${active ? html`
+          <div>
+            <div style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:'var(--r2)',padding:'18px 20px',marginBottom:14}}>
+              <div style=${{display:'flex',alignItems:'center',gap:7,marginBottom:9,flexWrap:'wrap'}}>
+                <span style=${{background:active.type==='video'?'rgba(246,201,70,.12)':'rgba(129,182,76,.12)',
+                  color:active.type==='video'?'#F6C946':accent,padding:'3px 10px',borderRadius:7,fontSize:11,fontWeight:700}}>
+                  ${active.type==='video'?'📹 Video':'♟ Pratik'}
+                </span>
+                <span style=${{color:'#7A7A7A',fontSize:12}}>⏱ ${active.dur}</span>
+                ${(solved[active.id]||active.done) && html`<span style=${{color:'#81B64C',fontSize:12,fontWeight:600}}>✓ Tamamlandı</span>`}
+              </div>
+              <h2 style=${{fontFamily:kids?'Fredoka One':'Playfair Display',fontSize:'clamp(17px,3vw,24px)',fontWeight:800}}>${active.title}</h2>
+            </div>
+
+            ${active.type==='video' && html`
+              <div style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:'var(--r2)',overflow:'hidden'}}>
+                <div style=${{aspectRatio:'16/9',background:'linear-gradient(135deg,#1E1B18,#2A2825)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,position:'relative'}}>
+                  <div className="glow" onClick=${function(){setSolved(function(p){var n=Object.assign({},p);n[active.id]=true;return n;});}}
+                    style=${{width:62,height:62,borderRadius:'50%',background:accent+'1E',border:'2px solid '+accent,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',fontSize:24,zIndex:1}}>▶</div>
+                  <p style=${{color:'#7A7A7A',fontSize:13,fontFamily:kids?'Fredoka One':'inherit'}}>Oynatmak için tıklayın</p>
+                  <span style=${{position:'absolute',bottom:9,right:11,background:'rgba(0,0,0,.55)',color:'#fff',padding:'2px 7px',borderRadius:4,fontSize:11}}>${active.dur}</span>
+                </div>
+                <div style=${{padding:'16px 20px'}}>
+                  <p style=${{color:'#BABABA',lineHeight:1.75,fontSize:13}}>Bu derste <strong style=${{color:'#fff'}}>${active.title}</strong> konusunu ele alıyoruz.</p>
+                </div>
+              </div>`}
+
+            ${active.type==='practice' && active.pzl && html`
+              <div style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:'var(--r2)',padding:'18px 20px'}}>
+                <div className="puzzle-grid">
+                  <div>
+                    <h3 style=${{fontFamily:kids?'Fredoka One':'Playfair Display',fontSize:17,marginBottom:10,color:accent}}>
+                      ${kids?'🎯 Doğru Hamleyi Bul!':'Doğru Hamleyi Bulun'}
+                    </h3>
+                    <div style=${{background:'var(--s2)',borderRadius:9,padding:13,marginBottom:12,border:'1px solid var(--bdr)'}}>
+                      <p style=${{fontSize:13,color:'#BABABA',lineHeight:1.7}}>💡 <strong style=${{color:'#fff'}}>İpucu:</strong> ${active.pzl.hint}</p>
+                    </div>
+                    <div style=${{background:'var(--s2)',borderRadius:9,padding:12,border:'1px solid var(--bdr)',marginBottom:12}}>
+                      <p style=${{fontSize:12,color:'#7A7A7A',lineHeight:1.65}}>Önce taşa, ardından gitmek istediğiniz kareye tıklayın.</p>
+                    </div>
+                    ${solved[active.id] && html`
+                      <div className="popIn" style=${{background:kids?'rgba(78,205,196,.1)':'rgba(129,182,76,.1)',border:'1px solid '+accent+'40',borderRadius:10,padding:14,textAlign:'center'}}>
+                        <div style=${{fontSize:26,marginBottom:5}}>${kids?'🏆':'✓'}</div>
+                        <div style=${{color:accent,fontWeight:700,fontFamily:kids?'Fredoka One':'inherit',fontSize:14}}>
+                          ${kids?'Süpersin! Harika Hamle! 🎉':'Mükemmel! Doğru hamle!'}
+                        </div>
+                      </div>`}
+                  </div>
+                  <${ChessBoard} position=${active.pzl.pos} kids=${kids} puzzle=${active.pzl}
+                    onSolve=${function(){setSolved(function(p){var n=Object.assign({},p);n[active.id]=true;return n;});}}/>
+                </div>
+              </div>`}
+
+            <div style=${{display:'flex',justifyContent:'space-between',marginTop:12,gap:10}}>
+              ${idx>0 ? html`<button onClick=${function(){setActive(cl[idx-1]);}} className="btn-ghost" style=${{fontSize:13,padding:'9px 16px',minHeight:40}}>← Önceki</button>` : html`<div/>`}
+              ${idx<cl.length-1 && html`<button onClick=${function(){setActive(cl[idx+1]);}} className="btn-green"
+                style=${{fontSize:13,padding:'9px 16px',minHeight:40,fontFamily:kids?'Fredoka One':'inherit',background:kids?'#4ECDC4':'#81B64C'}}>
+                ${kids?'İleri →':'Sonraki Ders →'}
+              </button>`}
+            </div>
+          </div>
+        ` : html`
+          <div style=${{textAlign:'center',padding:60,color:'#7A7A7A'}}>
+            <div style=${{fontSize:46,marginBottom:12}}>${course.emoji}</div>
+            <h3 style=${{fontSize:18,color:'#fff',marginBottom:7}}>${course.title}</h3>
+            <p style=${{fontSize:13}}>${course.desc}</p>
+          </div>`}
+      </main>
+    </div>
+  `;
+}
+
+/* ═══════════════ DASHBOARD ═══════════════ */
+function Dashboard({ user, nav }) {
+  var enrolled = COURSES.filter(function(c){ return user.enrolled && user.enrolled.indexOf(c.id) > -1; });
+  var prog = user.progress || 0;
+  return html`
+    <div style=${{maxWidth:820,margin:'0 auto',padding:'36px 18px'}}>
+      <div style=${{display:'flex',alignItems:'center',gap:13,marginBottom:28,flexWrap:'wrap'}}>
+        <div style=${{width:52,height:52,borderRadius:'50%',background:'#81B64C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:800,color:'#fff',flexShrink:0}}>${user.name[0]}</div>
+        <div>
+          <h1 style=${{fontFamily:'Playfair Display',fontSize:'clamp(18px,4vw,26px)',fontWeight:800}}>Merhaba, ${user.name.split(' ')[0]}! 👋</h1>
+          <p style=${{color:'#7A7A7A',fontSize:12}}>Katılım: ${user.join}</p>
+        </div>
+      </div>
+      <div className="dash-grid" style=${{marginBottom:18}}>
+        ${[{l:'Genel İlerleme',v:'%'+prog,c:'#81B64C'},{l:'Kayıtlı Kurs',v:enrolled.length,c:'#F6C946'},{l:'Tamamlanan',v:Math.floor(enrolled.length*3.4),c:'#7BBFEA'}].map(function(x){
+          return html`<div key=${x.l} style=${{background:'var(--s1)',border:'1px solid '+x.c+'22',borderRadius:'var(--r2)',padding:'16px 12px',textAlign:'center'}}>
+            <div style=${{fontFamily:'Playfair Display',fontSize:'clamp(22px,4vw,34px)',fontWeight:900,color:x.c}}>${x.v}</div>
+            <div style=${{color:'#7A7A7A',fontSize:12,marginTop:3}}>${x.l}</div>
+          </div>`;
+        })}
+      </div>
+      <div style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:'var(--r2)',padding:'18px 20px',marginBottom:18}}>
+        <div style=${{display:'flex',justifyContent:'space-between',marginBottom:9}}>
+          <span style=${{fontWeight:600,fontSize:14}}>Genel İlerleme</span>
+          <span style=${{color:'#81B64C',fontWeight:700}}>%${prog}</span>
+        </div>
+        <div style=${{background:'var(--s2)',borderRadius:6,height:10,overflow:'hidden'}}>
+          <div style=${{width:prog+'%',height:'100%',background:'linear-gradient(90deg,#81B64C,#A8D970)',borderRadius:6}}/>
+        </div>
+      </div>
+      <h2 style=${{fontFamily:'Playfair Display',fontSize:19,fontWeight:800,marginBottom:14}}>Kurslarım</h2>
+      ${enrolled.length===0 ? html`
+        <div style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:'var(--r2)',padding:32,textAlign:'center',color:'#7A7A7A'}}>
+          <div style=${{fontSize:34,marginBottom:9}}>📚</div>
+          <p style=${{marginBottom:14,fontSize:13}}>Henüz bir kursa kayıt olmadınız.</p>
+          <button onClick=${function(){nav('courses');}} className="btn-green">Kurs Keşfet</button>
+        </div>
+      ` : html`
+        <div style=${{display:'flex',flexDirection:'column',gap:10}}>
+          ${enrolled.map(function(c){
+            var cp = 20 + ((c.id*23)%58);
+            return html`<div key=${c.id} style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:'var(--r2)',padding:14,display:'flex',alignItems:'center',gap:12}}>
+              <div style=${{fontSize:26,width:38,textAlign:'center',flexShrink:0}}>${c.emoji}</div>
+              <div style=${{flex:1,minWidth:0}}>
+                <div style=${{display:'flex',justifyContent:'space-between',marginBottom:5,gap:6,flexWrap:'wrap'}}>
+                  <span style=${{fontWeight:600,fontSize:13}}>${c.title}</span>
+                  <span style=${{color:'#81B64C',fontWeight:700,fontSize:12}}>%${cp}</span>
+                </div>
+                <div style=${{background:'var(--s2)',borderRadius:5,height:7,overflow:'hidden'}}>
+                  <div style=${{width:cp+'%',height:'100%',background:'linear-gradient(90deg,'+c.color+','+c.color+'88)',borderRadius:5}}/>
+                </div>
+              </div>
+            </div>`;
+          })}
+        </div>`}
+    </div>
+  `;
+}
+
+/* ═══════════════ ADMIN ═══════════════ */
+function AdminPanel() {
+  const [tab,     setTab]     = useState('courses');
+  const [courses, setCourses] = useState(COURSES.slice());
+  const [lessons, setLessons] = useState(LESSONS.slice());
+  const [users,   setUsers]   = useState(INIT_USERS.slice());
+  const [modal,   setModal]   = useState(null);
+  const [form,    setForm]    = useState({});
+
+  function openAdd(t)    { setForm({}); setModal({type:t,mode:'add'}); }
+  function openEdit(t,d) { setForm(Object.assign({},d)); setModal({type:t,mode:'edit'}); }
+  function close()       { setModal(null); }
+
+  function save() {
+    if (!modal) return;
+    var t = modal.type, m = modal.mode;
+    if (t==='course') {
+      var o = Object.assign({},form,{lessons:+form.lessons||0,hours:+form.hours||0,rating:+form.rating||4.5,students:+form.students||0,emoji:form.emoji||'♟',color:form.color||'#81B64C',target:form.target||'adult'});
+      m==='add' ? setCourses(function(p){return p.concat([Object.assign({},o,{id:Date.now()})]);}) : setCourses(function(p){return p.map(function(c){return c.id===form.id?o:c;});});
+    } else if (t==='lesson') {
+      var o2 = Object.assign({},form,{cid:+form.cid,order:+form.order||1});
+      m==='add' ? setLessons(function(p){return p.concat([Object.assign({},o2,{id:Date.now()})]);}) : setLessons(function(p){return p.map(function(l){return l.id===form.id?o2:l;});});
+    } else {
+      var o3 = Object.assign({},form,{role:form.role||'user',enrolled:form.enrolled||[],progress:+form.progress||0});
+      m==='add' ? setUsers(function(p){return p.concat([Object.assign({},o3,{id:Date.now(),join:'Bugün'})]);}) : setUsers(function(p){return p.map(function(u){return u.id===form.id?o3:u;});});
+    }
+    close();
+  }
+
+  function delItem(type, id) {
+    if (type==='course') setCourses(function(p){return p.filter(function(c){return c.id!==id;});});
+    else if (type==='lesson') setLessons(function(p){return p.filter(function(l){return l.id!==id;});});
+    else setUsers(function(p){return p.filter(function(u){return u.id!==id;});});
+  }
+
+  function inp(k, ph, t) {
+    t = t || 'text';
+    return html`<input value=${form[k]||''} onInput=${function(e){setForm(function(p){var n=Object.assign({},p);n[k]=e.target.value;return n;});}}
+      placeholder=${ph} type=${t} style=${{background:'var(--s2)',border:'1px solid var(--bdr)',color:'#fff',padding:'10px 12px',borderRadius:8,width:'100%',fontSize:13}}/>`;
+  }
+  function sel(k, opts) {
+    return html`<select value=${form[k]||''} onChange=${function(e){setForm(function(p){var n=Object.assign({},p);n[k]=e.target.value;return n;});}}
+      style=${{background:'var(--s2)',border:'1px solid var(--bdr)',color:'#fff',padding:'10px 12px',borderRadius:8,width:'100%',fontSize:13}}>
+      <option value=''>Seçin…</option>
+      ${opts.map(function(o){ var v=o.v||o, l=o.l||o; return html`<option key=${v} value=${v}>${l}</option>`; })}
+    </select>`;
+  }
+
+  function TB(t, l) {
+    return html`<button onClick=${function(){setTab(t);}}
+      style=${{background:tab===t?'rgba(129,182,76,.14)':'transparent',color:tab===t?'#81B64C':'#BABABA',
+        border:'1px solid '+(tab===t?'rgba(129,182,76,.3)':'transparent'),padding:'8px 16px',borderRadius:8,
+        cursor:'pointer',fontSize:13,fontWeight:600,fontFamily:'inherit',minHeight:40}}>${l}</button>`;
+  }
+  function RB(type, item) {
+    var isAdmin = type==='user' && item.role==='admin';
+    return html`<div style=${{display:'flex',gap:6,flexShrink:0}}>
+      <button onClick=${function(){openEdit(type,item);}} style=${{background:'rgba(123,156,255,.1)',color:'#7B9CFF',border:'1px solid rgba(123,156,255,.2)',padding:'6px 12px',borderRadius:7,cursor:'pointer',fontSize:12,fontFamily:'inherit',minHeight:36}}>Düzenle</button>
+      <button onClick=${function(){delItem(type,item.id);}} disabled=${isAdmin}
+        style=${{background:isAdmin?'transparent':'rgba(224,107,107,.12)',color:isAdmin?'#444':'#E06B6B',
+          border:'1px solid '+(isAdmin?'transparent':'rgba(224,107,107,.25)'),padding:'6px 12px',borderRadius:7,
+          cursor:isAdmin?'not-allowed':'pointer',fontSize:12,fontFamily:'inherit',minHeight:36}}>Sil</button>
+    </div>`;
+  }
+
+  return html`
+    <div style=${{maxWidth:1020,margin:'0 auto',padding:'32px 18px'}}>
+      <div style=${{marginBottom:24}}>
+        <h1 style=${{fontFamily:'Playfair Display',fontSize:'clamp(20px,4vw,30px)',fontWeight:900,marginBottom:3}}>⚙️ Yönetim Paneli</h1>
+        <p style=${{color:'#7A7A7A',fontSize:12}}>Kurs, ders ve kullanıcıları buradan yönetin.</p>
+      </div>
+      <div style=${{display:'flex',gap:5,marginBottom:20,background:'var(--s1)',padding:4,borderRadius:10,width:'fit-content',border:'1px solid var(--bdr)',flexWrap:'wrap'}}>
+        ${TB('courses','📚 Kurslar')} ${TB('lessons','♟ Dersler')} ${TB('users','👥 Kullanıcılar')}
+      </div>
+
+      ${tab==='courses' && html`
+        <div>
+          <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12,flexWrap:'wrap',gap:9}}>
+            <h2 style=${{fontWeight:700,fontSize:16}}>Kurslar (${courses.length})</h2>
+            <button onClick=${function(){openAdd('course');}} className="btn-green" style=${{padding:'8px 16px',fontSize:13}}>+ Yeni Kurs</button>
+          </div>
+          <div style=${{display:'flex',flexDirection:'column',gap:9}}>
+            ${courses.map(function(c){
+              return html`<div key=${c.id} style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:10,padding:'13px 14px',display:'flex',alignItems:'center',gap:11,flexWrap:'wrap'}}>
+                <span style=${{fontSize:24,width:30,textAlign:'center',flexShrink:0}}>${c.emoji}</span>
+                <div style=${{flex:1,minWidth:150}}>
+                  <div style=${{display:'flex',alignItems:'center',gap:5,flexWrap:'wrap',marginBottom:2}}>
+                    <span style=${{fontWeight:600,fontSize:13}}>${c.title}</span>
+                    <span style=${{background:c.target==='kids'?'rgba(78,205,196,.12)':'rgba(129,182,76,.1)',color:c.target==='kids'?'#4ECDC4':'#81B64C',padding:'1px 6px',borderRadius:6,fontSize:9,fontWeight:700}}>${c.target==='kids'?'Çocuk':'Yetişkin'}</span>
+                  </div>
+                  <div style=${{color:'#555',fontSize:11}}>${c.lessons} ders · ${c.hours} saat</div>
+                </div>
+                ${RB('course',c)}
+              </div>`;
+            })}
+          </div>
+        </div>`}
+
+      ${tab==='lessons' && html`
+        <div>
+          <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12,flexWrap:'wrap',gap:9}}>
+            <h2 style=${{fontWeight:700,fontSize:16}}>Dersler (${lessons.length})</h2>
+            <button onClick=${function(){openAdd('lesson');}} className="btn-green" style=${{padding:'8px 16px',fontSize:13}}>+ Yeni Ders</button>
+          </div>
+          <div style=${{display:'flex',flexDirection:'column',gap:9}}>
+            ${lessons.map(function(l){
+              var c = courses.find(function(x){return x.id===l.cid;});
+              return html`<div key=${l.id} style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:10,padding:'13px 14px',display:'flex',alignItems:'center',gap:11,flexWrap:'wrap'}}>
+                <span style=${{background:l.type==='video'?'rgba(246,201,70,.1)':'rgba(129,182,76,.1)',color:l.type==='video'?'#F6C946':'#81B64C',padding:'3px 7px',borderRadius:5,fontSize:11,fontWeight:700,flexShrink:0}}>${l.type==='video'?'▶ Video':'♟ Pratik'}</span>
+                <div style=${{flex:1,minWidth:130}}>
+                  <div style=${{fontWeight:600,fontSize:13,marginBottom:1}}>${l.order}. ${l.title}</div>
+                  <div style=${{color:'#555',fontSize:11}}>${c?c.title:'?'} · ${l.dur}</div>
+                </div>
+                ${RB('lesson',l)}
+              </div>`;
+            })}
+          </div>
+        </div>`}
+
+      ${tab==='users' && html`
+        <div>
+          <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12,flexWrap:'wrap',gap:9}}>
+            <h2 style=${{fontWeight:700,fontSize:16}}>Kullanıcılar (${users.length})</h2>
+            <button onClick=${function(){openAdd('user');}} className="btn-green" style=${{padding:'8px 16px',fontSize:13}}>+ Kullanıcı Ekle</button>
+          </div>
+          <div style=${{display:'flex',flexDirection:'column',gap:9}}>
+            ${users.map(function(u){
+              return html`<div key=${u.id} style=${{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:10,padding:'13px 14px',display:'flex',alignItems:'center',gap:11,flexWrap:'wrap'}}>
+                <div style=${{width:36,height:36,borderRadius:'50%',background:'#81B64C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,color:'#fff',flexShrink:0}}>${u.name[0]}</div>
+                <div style=${{flex:1,minWidth:130}}>
+                  <div style=${{display:'flex',alignItems:'center',gap:5,flexWrap:'wrap',marginBottom:1}}>
+                    <span style=${{fontWeight:600,fontSize:13}}>${u.name}</span>
+                    <span style=${{background:u.role==='admin'?'rgba(246,201,70,.12)':'rgba(129,182,76,.1)',color:u.role==='admin'?'#F6C946':'#81B64C',padding:'1px 6px',borderRadius:6,fontSize:9,fontWeight:700}}>${u.role==='admin'?'Admin':'Üye'}</span>
+                  </div>
+                  <div style=${{color:'#555',fontSize:11}}>${u.email} · %${u.progress}</div>
+                </div>
+                ${RB('user',u)}
+              </div>`;
+            })}
+          </div>
+        </div>`}
+
+      ${modal && html`
+        <div style=${{position:'fixed',inset:0,background:'rgba(0,0,0,.78)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:16}}
+          onClick=${function(e){if(e.target===e.currentTarget)close();}}>
+          <div className="popIn" style=${{background:'#2A2725',border:'1px solid rgba(129,182,76,.2)',borderRadius:16,padding:'24px 20px',width:'min(460px,100%)',maxHeight:'82vh',overflow:'auto'}}>
+            <h3 style=${{fontFamily:'Playfair Display',fontSize:18,fontWeight:800,marginBottom:18}}>
+              ${modal.mode==='add'?'Yeni':'Düzenle'} ${modal.type==='course'?'Kurs':modal.type==='lesson'?'Ders':'Kullanıcı'}
+            </h3>
+            <div style=${{display:'flex',flexDirection:'column',gap:9}}>
+              ${modal.type==='course' && html`<span>${inp('title','Kurs adı')} ${inp('emoji','Emoji')} ${sel('level',['Başlangıç','Orta','İleri'])} ${sel('target',[{v:'adult',l:'Yetişkin'},{v:'kids',l:'Çocuk'}])} ${inp('lessons','Ders sayısı','number')} ${inp('hours','Saat','number')} ${inp('desc','Açıklama')} ${inp('badge','Rozet (opsiyonel)')}</span>`}
+              ${modal.type==='lesson' && html`<span>${inp('title','Ders adı')}
+                <select value=${form.cid||''} onChange=${function(e){setForm(function(p){var n=Object.assign({},p);n.cid=e.target.value;return n;});}}
+                  style=${{background:'var(--s2)',border:'1px solid var(--bdr)',color:'#fff',padding:'10px 12px',borderRadius:8,width:'100%',fontSize:13}}>
+                  <option value=''>Kurs seçin…</option>
+                  ${courses.map(function(c){return html`<option key=${c.id} value=${c.id}>${c.title}</option>`;})}
+                </select>
+                ${sel('type',[{v:'video',l:'Video'},{v:'practice',l:'Pratik'}])} ${inp('dur','Süre (ör: 15 dk)')} ${inp('order','Sıra','number')}</span>`}
+              ${modal.type==='user' && html`<span>${inp('name','Ad Soyad')} ${inp('email','E-posta','email')} ${inp('pass','Şifre','password')} ${sel('role',[{v:'user',l:'Üye'},{v:'admin',l:'Admin'}])} ${inp('progress','İlerleme (%)','number')}</span>`}
+            </div>
+            <div className="modal-footer" style=${{display:'flex',gap:9,marginTop:18,justifyContent:'flex-end'}}>
+              <button onClick=${close} className="btn-ghost" style=${{padding:'10px 18px',fontSize:13}}>İptal</button>
+              <button onClick=${save} className="btn-green" style=${{padding:'10px 22px',fontSize:13}}>Kaydet</button>
+            </div>
+          </div>
+        </div>`}
+    </div>
+  `;
+}
+
+/* ═══════════════ AUTH ═══════════════ */
+function AuthPage({ mode, nav, onLogin }) {
+  const [form, setForm] = useState({});
+  const [err,  setErr]  = useState('');
+  var isLogin = mode === 'login';
+  function submit() {
+    if (isLogin) {
+      var u = INIT_USERS.find(function(u){ return u.email===form.email && u.pass===form.pass; });
+      if (u) { onLogin(u); nav('dashboard'); }
+      else setErr('Hatalı giriş. Dene: ahmet@mail.com / 1234 veya admin@chess.com / admin123');
+    } else {
+      if (!form.name||!form.email||!form.pass) { setErr('Tüm alanları doldurun.'); return; }
+      onLogin({id:Date.now(),name:form.name,email:form.email,pass:form.pass,role:'user',join:'Bugün',enrolled:[],progress:0});
+      nav('dashboard');
+    }
+  }
+  function field(k, lbl, t, ph) {
+    return html`<div>
+      <label style=${{fontSize:11,color:'#BABABA',marginBottom:5,display:'block'}}>${lbl}</label>
+      <input value=${form[k]||''} onInput=${function(e){setForm(function(p){var n=Object.assign({},p);n[k]=e.target.value;return n;});}} placeholder=${ph} type=${t}
+        style=${{background:'var(--s2)',border:'1px solid var(--bdr)',color:'#fff',padding:'11px 13px',borderRadius:9,width:'100%',fontSize:14}}/>
+    </div>`;
+  }
+  return html`
+    <div style=${{minHeight:'80vh',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px 16px'}}>
+      <div className="popIn" style=${{background:'var(--s1)',border:'1px solid rgba(129,182,76,.15)',borderRadius:18,padding:'32px 24px',width:'min(400px,100%)'}}>
+        <div style=${{textAlign:'center',marginBottom:26}}>
+          <div style=${{fontSize:36,marginBottom:9}}>♟</div>
+          <h2 style=${{fontFamily:'Playfair Display',fontSize:22,fontWeight:900,marginBottom:4}}>${isLogin?'Hoş Geldiniz':'Üye Olun'}</h2>
+          <p style=${{color:'#7A7A7A',fontSize:12}}>${isLogin?'Hesabınıza giriş yapın':'Satranç yolculuğunuza başlayın'}</p>
+        </div>
+        <div style=${{display:'flex',flexDirection:'column',gap:11}}>
+          ${!isLogin && field('name','Ad Soyad','text','Adınız Soyadınız')}
+          ${field('email','E-posta','email','ornek@mail.com')}
+          ${field('pass','Şifre','password','••••••••')}
+        </div>
+        ${err && html`<div style=${{background:'rgba(224,107,107,.1)',border:'1px solid rgba(224,107,107,.25)',color:'#E06B6B',padding:'9px 13px',borderRadius:7,fontSize:12,marginTop:10,lineHeight:1.5}}>${err}</div>`}
+        <button onClick=${submit} className="btn-green" style=${{width:'100%',padding:13,fontSize:15,borderRadius:10,marginTop:16}}>
+          ${isLogin?'Giriş Yap':'Üye Ol'}
+        </button>
+        <p style=${{textAlign:'center',color:'#7A7A7A',fontSize:12,marginTop:12}}>
+          ${isLogin?'Hesabınız yok mu? ':'Zaten üye misiniz? '}
+          <span onClick=${function(){nav(isLogin?'register':'login');setErr('');}} style=${{color:'#81B64C',cursor:'pointer',fontWeight:600}}>${isLogin?'Üye Ol':'Giriş Yap'}</span>
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+/* ═══════════════ FOOTER ═══════════════ */
+function Footer() {
+  return html`
+    <footer style=${{background:'#1E1B18',borderTop:'1px solid rgba(255,255,255,.06)',padding:'36px 20px 20px',marginTop:56}}>
+      <div className="footer-grid" style=${{maxWidth:920,margin:'0 auto',display:'grid',gridTemplateColumns:'2fr 1fr 1fr',gap:24,marginBottom:24}}>
+        <div>
+          <div style=${{display:'flex',alignItems:'center',gap:7,marginBottom:9}}>
+            <span style=${{fontSize:20}}>♟</span>
+            <span style=${{fontFamily:'Playfair Display',fontWeight:900,fontSize:16,color:'#81B64C'}}>ChessMaster</span>
+          </div>
+          <p style=${{color:'#555',fontSize:12,lineHeight:1.75}}>Türkiye'nin en kapsamlı online satranç eğitim platformu.</p>
+        </div>
+        <div>
+          <h4 style=${{color:'#fff',fontWeight:600,fontSize:12,marginBottom:9}}>Kurslar</h4>
+          ${['Başlangıç','Orta Seviye','İleri Seviye','Çocuk Kursları'].map(function(l){return html`<div key=${l} style=${{color:'#555',fontSize:12,marginBottom:6}}>${l}</div>`;})}
+        </div>
+        <div>
+          <h4 style=${{color:'#fff',fontWeight:600,fontSize:12,marginBottom:9}}>Destek</h4>
+          ${['SSS','İletişim','Gizlilik','Kullanım Şartları'].map(function(l){return html`<div key=${l} style=${{color:'#555',fontSize:12,marginBottom:6}}>${l}</div>`;})}
+        </div>
+      </div>
+      <div style=${{borderTop:'1px solid rgba(255,255,255,.05)',paddingTop:12,textAlign:'center',color:'#444',fontSize:11}}>
+        © 2025 ChessMaster. Tüm hakları saklıdır. ♟
+      </div>
+    </footer>
+  `;
+}
+
+/* ═══════════════ APP ═══════════════ */
+function App() {
+  const [page,         setPage]         = useState('home');
+  const [user,         setUser]         = useState(null);
+  const [activeCourse, setActiveCourse] = useState(null);
+
+  var nav = useCallback(function(p) {
+    if ((p==='dashboard'||p==='admin') && !user) { setPage('login'); return; }
+    if (p==='admin' && (!user || user.role!=='admin')) return;
+    setPage(p);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }, [user]);
+
+  function renderPage() {
+    switch(page) {
+      case 'home':      return html`<${HomePage} nav=${nav}/>`;
+      case 'courses':   return html`<${CoursesPage} nav=${nav} setActiveCourse=${setActiveCourse}/>`;
+      case 'kids':      return html`<${KidsPage} nav=${nav} setActiveCourse=${setActiveCourse}/>`;
+      case 'lesson':    return activeCourse ? html`<${LessonPage} course=${activeCourse} nav=${nav}/>` : html`<${CoursesPage} nav=${nav} setActiveCourse=${setActiveCourse}/>`;
+      case 'dashboard': return html`<${Dashboard} user=${user} nav=${nav}/>`;
+      case 'admin':     return html`<${AdminPanel}/>`;
+      case 'login':     return html`<${AuthPage} mode="login" nav=${nav} onLogin=${setUser}/>`;
+      case 'register':  return html`<${AuthPage} mode="register" nav=${nav} onLogin=${setUser}/>`;
+      default:          return html`<${HomePage} nav=${nav}/>`;
+    }
+  }
+
+  return html`
+    <div style=${{minHeight:'100vh',background:'var(--bg)',color:'var(--txt)'}}>
+      <${Navbar} page=${page} nav=${nav} user=${user} onLogout=${function(){setUser(null);setPage('home');}}/>
+      <main>${renderPage()}</main>
+      ${!['admin','login','register'].includes(page) && html`<${Footer}/>`}
+    </div>
+  `;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script>
+</body>
+</html>
